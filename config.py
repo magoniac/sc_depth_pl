@@ -21,7 +21,7 @@ def get_opts():
 
     # model
     parser.add_argument('--model_version', type=str,
-                        default='v1', choices=['v1', 'v2', 'v3'])
+                        default='v3', choices=['v1', 'v2', 'v3'])
     parser.add_argument('--resnet_layers', type=int, default=18)
     parser.add_argument('--ckpt_path', type=str, default=None,
                         help='pretrained checkpoint path to load')
@@ -70,11 +70,11 @@ def get_opts():
     parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
 
     # inference options
-    parser.add_argument('--input_dir', type=str, help='input image path')
-    parser.add_argument('--output_dir', type=str, help='output depth path')
-    parser.add_argument('--save-vis', action='store_true',
+    parser.add_argument('--input_dir', type=str, default='./demo/input', help='input image path')
+    parser.add_argument('--output_dir', type=str, default='./demo/output', help='output depth path')
+    parser.add_argument('--save-vis', default=True, action='store_true',
                         help='save depth visualization')
-    parser.add_argument('--save-depth', action='store_true',
+    parser.add_argument('--save-depth', default=True, action='store_true',
                         help='save depth with factor 1000')
 
     return parser.parse_args()

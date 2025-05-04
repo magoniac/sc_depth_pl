@@ -27,7 +27,9 @@ def main():
     elif hparams.model_version == 'v3':
         system = SC_DepthV3(hparams)
 
-    system = system.load_from_checkpoint(hparams.ckpt_path, strict=False)
+    hparams.ckpt_path = './ckpts/nyu_scv3/epoch=93-val_loss=0.1384.ckpt'
+    # hparams.ckpt_path = './ckpts/epoch=75-val_loss=0.1438.ckpt'
+    system = SC_DepthV3.load_from_checkpoint(hparams.ckpt_path, strict=False)
 
     model = system.depth_net
     model.cuda()
@@ -66,6 +68,7 @@ def main():
 
         img = imread(img_file).astype(np.float32)
         tensor_img = inference_transform([img])[0][0].unsqueeze(0).cuda()
+        dummy_input = tensor_img
         pred_depth = model(tensor_img)
 
         if hparams.save_vis:
@@ -78,6 +81,19 @@ def main():
             depth = pred_depth[0, 0].cpu().numpy()
             np.save(output_dir/'depth/{}.npy'.format(filename), depth)
 
+    device = torch.device("cuda")
+    #dummy_rand = torch.randn(1, 3, 640, 480).to(device)  # Adjust input size as needed
+
+    model_name = "sc_depth_v3_nyu.onnx"
+    torch.onnx.export(model,  # model being run
+                    tensor_img,  # model input (or a tuple for multiple inputs)
+                    model_name,  # where to save the model (can be a file or file-like object)
+                    input_names=['input'],
+                    output_names=['output'],
+                    export_params=True,  # store the trained parameter weights inside the model file
+                    opset_version=16)
+    
+    print("\n-> Done!")
 
 if __name__ == '__main__':
     main()

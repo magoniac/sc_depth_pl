@@ -11,6 +11,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torchvision.models as models
+from torchvision.models import resnet18, ResNet18_Weights, resnet50, ResNet50_Weights
 
 
 class ResNetMultiImageInput(models.ResNet):
@@ -55,8 +56,14 @@ def resnet_multiimage_input(num_layers, pretrained=False, num_input_images=1):
         block_type, blocks, num_input_images=num_input_images)
 
     if pretrained:
-        loaded = torch.hub.load_state_dict_from_url(
-            models.resnet.model_urls['resnet{}'.format(num_layers)])
+        
+        # if num_layers == 50:
+        #     org_resnet = torch.utils.model_zoo.load_url(models.ResNet50_Weights.url)
+        # Old stuff is lagging behinded breaking changes in ResNet - model_urls is obsolete
+        weightsUrl = models.ResNet18_Weights.IMAGENET1K_V1.url
+        loaded = torch.hub.load_state_dict_from_url(weightsUrl)
+        # loaded = torch.hub.load_state_dict_from_url(
+        #     models.resnet.model_urls['resnet{}'.format(num_layers)])
         loaded['conv1.weight'] = torch.cat(
             [loaded['conv1.weight']] * num_input_images, 1) / num_input_images
         model.load_state_dict(loaded)
